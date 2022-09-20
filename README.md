@@ -1,4 +1,4 @@
-# Spring Product REST API PostgreSQL
+# Spring Product REST API
 
 [Youtube Demo](https://www.youtube.com/watch?v=ulz_9niMiq8)
 
