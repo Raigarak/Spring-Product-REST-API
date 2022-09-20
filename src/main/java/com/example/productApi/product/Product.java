@@ -1,9 +1,21 @@
 package com.example.productApi.product;
 
+import com.example.productApi.brand.Brand;
+import com.example.productApi.warehouse.Warehouse;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
-@Table
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                name = "name_unique",
+                columnNames = "name"
+       )
+)
 public class Product {
     @Id
     @SequenceGenerator(
@@ -18,29 +30,39 @@ public class Product {
     private Long id;
     private String name;
     private String description;
-    private String brand;
-    private Integer quantity;
     private Double price;
 
-    public Product(Long id, String name, String description, String brand, Integer quantity, Double price) {
+    @Embedded
+    private Brand brand;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_warehouse",
+            joinColumns = {
+                    @JoinColumn(name = "product_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "warehouse_id", referencedColumnName = "id")
+            }
+    )
+    private Set<Warehouse> warehouses;
+
+    public Product(Long id, String name, String description, Double price, Brand brand) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.brand = brand;
-        this.quantity = quantity;
         this.price = price;
+        this.brand = brand;
+    }
+
+    public Product(String name, String description, Double price, Brand brand) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.brand = brand;
     }
 
     public Product() {
-
-    }
-
-    public Product(String name, String description, String brand, Integer quantity, Double price) {
-        this.name = name;
-        this.description = description;
-        this.brand = brand;
-        this.quantity = quantity;
-        this.price = price;
     }
 
     public Long getId() {
@@ -67,22 +89,6 @@ public class Product {
         this.description = description;
     }
 
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public Double getPrice() {
         return price;
     }
@@ -91,15 +97,35 @@ public class Product {
         this.price = price;
     }
 
+    public Brand getBrand() {
+        return brand;
+    }
+
+    public void setBrand(Brand brand) {
+        this.brand = brand;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(description, product.description) && Objects.equals(price, product.price) && Objects.equals(brand, product.brand);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, price, brand);
+    }
+
     @Override
     public String toString() {
         return "Product{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", brand='" + brand + '\'' +
-                ", quantity=" + quantity +
                 ", price=" + price +
+                ", brand=" + brand +
                 '}';
     }
 }
