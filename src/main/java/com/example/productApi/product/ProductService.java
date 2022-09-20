@@ -1,5 +1,6 @@
 package com.example.productApi.product;
 
+import com.example.productApi.brand.Brand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,10 @@ public class ProductService {
         return productRepository.findProductByName(name);
     }
 
+    public Product findProductByBrand(Brand brand) {
+        return productRepository.findProductByBrand(brand);
+    }
+
     public Product findProductByID(Long id) {
         return productRepository.findById(id).get();
     }
@@ -39,27 +44,16 @@ public class ProductService {
         this.productRepository.deleteById(id);
     }
 
-    public List<Product> findProductByBrand(String brand) {
-        return productRepository.findProductByBrand(brand);
-    }
-
-    public void updateProduct(Long id, Product product) {
-        Product oldProduct = productRepository.findById(id).get();
-        if(product.getName() != null && !product.getName().isEmpty()) {
-            oldProduct.setName(product.getName());
-        }
-        if(product.getDescription()!= null && !product.getDescription().isEmpty()) {
-            oldProduct.setDescription(product.getDescription());
-        }
-        if(product.getBrand() != null && !product.getBrand().isEmpty()) {
-            oldProduct.setBrand(product.getBrand());
-        }
-        if(product.getQuantity() >= 0) {
-            oldProduct.setQuantity(product.getQuantity());
-        }
-        if(product.getPrice() >= 0) {
-            oldProduct.setPrice(product.getPrice());
-        }
-        productRepository.save(oldProduct);
+    public void updateProduct(Long id, Product newProduct) {
+        productRepository.findById(id)
+                .map(product -> {
+                    product.setName(newProduct.getName());
+                    product.setDescription(newProduct.getDescription());
+                    product.setPrice(newProduct.getPrice());
+                    product.setBrand(newProduct.getBrand());
+                    return productRepository.save(product);
+                })
+                .orElseGet(() -> productRepository.save(newProduct)
+                );
     }
 }
